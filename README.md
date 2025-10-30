@@ -103,10 +103,10 @@ Oba servisa izlažu H2 konzolu za pregled baze:
 
 ### Redosled pokretanja
 
-1. DiscoveryServiceApplication
-2. ApiGateWayApplication
-3. StudentsServiceApplication
-4. EnrollmentsServiceApplication
+1. DiscoveryServiceApplication - port: 8761
+2. ApiGateWayApplication - port: 8081
+3. StudentsServiceApplication - port: 9081
+4. EnrollmentsServiceApplication - port: 9082
   
 Pristupite H2 konzolama po potrebi.  
 Koristite **REST klijent** (Postman, curl, itd.) za testiranje endpoint-a.  
