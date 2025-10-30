@@ -34,6 +34,21 @@ The system consists of two main services:
 
 ## Architecture
 
+```mermaid
+flowchart LR
+    Eureka[Eureka Server]:::service
+    Students[Students Service<br/>(CRUD on Student)]:::service
+    Enrollments[Enrollments Service<br/>(CRUD on Enrollment)]:::service
+    Feign[Feign Client]:::client
+
+    Enrollments -->|Registers| Eureka
+    Students -->|Registers| Eureka
+    Enrollments -->|Validates studentId| Feign
+    Feign --> Students
+
+    classDef service fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef client fill:#bbf,stroke:#333,stroke-width:2px;
+```
 
 **Flow explanation:**
 
