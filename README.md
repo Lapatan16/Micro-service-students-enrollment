@@ -12,7 +12,6 @@
 - [Running the Project](#running-the-project)  
 - [Endpoints](#endpoints)  
 - [Validation & Error Handling](#validation--error-handling)  
-- [License](#license)  
 
 ---
 
@@ -165,3 +164,5 @@ Both services expose an H2 console for database inspection:
   - `409 Conflict` → for duplicate email or index number  
   - `400 Bad Request` → validation errors  
   - `503 Service Unavailable` → when dependent service is down
+
+---
