@@ -111,8 +111,7 @@ Oba servisa izlažu H2 konzolu za pregled baze:
 - **Circuit Breaker:** sprečava kaskadne greške kada Students Service nije dostupan.  
 - **Retry:** automatski pokušava ponovo neuspešne zahteve pre nego što se aktivira fallback.  
 - **Fallbacks / rezervne opcije:**  
-  - Za `create`/`update` u Enrollments Service, ako Students Service nije dostupan, vraća se **503 Service Unavailable**.  
-  - Za `details` endpoint, vraća se delimičan odgovor sa poljima studenta označenim kao `"UNKNOWN"`.  
+  - Za `create`/`update` u Enrollments Service, ako Students Service nije dostupan, vraća se **503 Service Unavailable**.   
 
 ---
 
