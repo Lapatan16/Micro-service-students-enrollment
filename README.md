@@ -45,6 +45,25 @@ Sistem se sastoji od dva glavna servisa:
 
 ---
 
+## Šta je urađeno
+
+### Obavezno
+
+1. Service Discovery – Eureka Server
+2. API Gateway – Spring Cloud Gateway
+3. Dva mikroservisa
+   - StudentsService
+   - EnrollmentsService
+4. Komunikacija servis–servis – OpenFeign
+5. Otpornost – Resilience4j (Circuit Breaker + Retry)
+6. Persistencija: H2 (in-memory) za oba servisa
+7. Agregacioni endpoint
+   - GET /enrollments/{id}/details
+
+### Opciono
+
+1. Jednostavna autentikacija na gateway-u putem API key filter
+
 ## Moduli
 
 ### 1. Students Service
