@@ -6,7 +6,7 @@
 - [Arhitektura](#arhitektura)  
 - [Korišćene Tehnologije](#korišćene-tehnologije)  
 - [Moduli](#moduli)  
-- [Konfiguracija Baze](#konfiguracija-baze)  
+- [Tabela servisa](#tabela-servisa)  
 - [Pristup H2 Konzoli](#pristup-h2-konzoli)  
 - [Otpornost i Tolerancija na Greške](#otpornost-i-tolerancija-na-greške)  
 - [Pokretanje Projekta](#pokretanje-projekta)  
@@ -59,17 +59,15 @@ Sistem se sastoji od dva glavna servisa:
 
 ---
 
-## Konfiguracija Baze
+## Tabela Servisa
 
-Oba servisa koriste **in-memory H2 baze**:
+| Servis               | Port  | Rute / Endpoint-i                       | Odgovornosti                                  |
+|---------------------|-------|----------------------------------------|-----------------------------------------------|
+| API Gateway          | 8081  | `/students/**`, `/enrollments/**`      | Rukovanje svim spoljnim zahtevima, prosleđivanje ka odgovarajućim mikroservisima |
+| Students Service     | 9081  | `/students`, `/students/{id}`          | Upravljanje studentima (CRUD), validacija   |
+| Enrollments Service  | 9082  | `/enrollments`, `/enrollments/{id}`, `/enrollments/{id}/details` | Upravljanje upisima (CRUD), agregacija podataka o studentima, validacija, otpornost na greške (Resilience4j) |
+| Eureka Server        | 8761  | `/`                                     | Otkrivanje servisa (Service Registry)        |
 
-| Servis               | JDBC URL                                         | Korisnik | Lozinka |
-|---------------------|-------------------------------------------------|----------|---------|
-| Students Service     | `jdbc:h2:mem:studentsdb;DB_CLOSE_DELAY=-1`     | sa       | (prazno)|
-| Enrollments Service  | `jdbc:h2:mem:enrolldb;DB_CLOSE_DELAY=-1`       | sa       | (prazno)|
-
-- Baza je **in-memory**, tako da se svi podaci gube kada servis prestane da radi.  
-- Hibernate `ddl-auto: update` automatski kreira tabele pri pokretanju.  
 
 ---
 
