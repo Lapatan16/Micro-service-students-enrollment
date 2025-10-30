@@ -1,183 +1,152 @@
-# Students & Enrollments Microservices Project
+# Projekat Mikroservisa: Studenti i Upisi
 
-## Table of Contents
+## Sadržaj
 
-- [Project Overview](#project-overview)  
-- [Architecture](#architecture)  
-- [Technologies Used](#technologies-used)  
-- [Modules](#modules)  
-- [Database Configuration](#database-configuration)  
-- [H2 Console Access](#h2-console-access)  
-- [Resilience & Fault Tolerance](#resilience--fault-tolerance)  
-- [Running the Project](#running-the-project)  
-- [Endpoints](#endpoints)  
-- [Validation & Error Handling](#validation--error-handling)  
-
----
-
-## Project Overview
-
-This project is a **microservices-based system** for managing students and their course enrollments. It demonstrates best practices in:
-
-- Microservices architecture with **service discovery** (Eureka)  
-- **RESTful APIs** for CRUD operations  
-- **Validation** using Jakarta Bean Validation (`@Valid`, `@NotNull`, `@Pattern`)  
-- **Resilience and fault tolerance** using Resilience4j (Circuit Breaker + Retry)  
-- In-memory **H2 database** for fast development and testing  
-
-The system consists of two main services:
-
-1. **Students Service** — manages student data (full name, email, index number).  
-2. **Enrollments Service** — manages course enrollments and validates students via Feign calls to Students Service.  
+- [Pregled Projekta](#pregled-projekta)  
+- [Arhitektura](#arhitektura)  
+- [Korišćene Tehnologije](#korišćene-tehnologije)  
+- [Moduli](#moduli)  
+- [Konfiguracija Baze](#konfiguracija-baze)  
+- [Pristup H2 Konzoli](#pristup-h2-konzoli)  
+- [Otpornost i Tolerancija na Greške](#otpornost-i-tolerancija-na-greške)  
+- [Pokretanje Projekta](#pokretanje-projekta)  
+- [Endpoints / API](#endpoints--api)  
+- [Validacija i Obrada Grešaka](#validacija-i-obrada-grešaka)  
 
 ---
 
-## Architecture
+## Pregled Projekta
 
-```mermaid
-flowchart LR
-    Eureka[Eureka Server]:::service
-    Students[Students Service<br/>(CRUD on Student)]:::service
-    Enrollments[Enrollments Service<br/>(CRUD on Enrollment)]:::service
-    Feign[Feign Client]:::client
+Ovaj projekat je **sistem baziran na mikroservisima** za upravljanje studentima i njihovim upisima na kurseve. Pokazuje najbolje prakse u:
 
-    Enrollments -->|Registers| Eureka
-    Students -->|Registers| Eureka
-    Enrollments -->|Validates studentId| Feign
-    Feign --> Students
+- Arhitekturi mikroservisa sa **otkrivanjem servisa** (Eureka)  
+- **RESTful API-ji** za CRUD operacije  
+- **Validacija** koristeći Jakarta Bean Validation (`@Valid`, `@NotNull`, `@Pattern`)  
+- **Otpornost i tolerancija na greške** koristeći Resilience4j (Circuit Breaker + Retry)  
+- In-memory **H2 bazu** za brzi razvoj i testiranje  
 
-    classDef service fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef client fill:#bbf,stroke:#333,stroke-width:2px;
-```
+Sistem se sastoji od dva glavna servisa:
 
-**Flow explanation:**
+1. **Students Service** — upravlja podacima o studentima (puno ime, email, broj indeksa).  
+2. **Enrollments Service** — upravlja upisima na kurseve i validira studente preko Feign poziva ka Students Service.  
 
-1. Enrollments Service calls Students Service via **Feign client** to validate `studentId`.  
-2. If Students Service is down, **Resilience4j Circuit Breaker + Retry** prevents cascading failures.  
-3. Enrollment details endpoint aggregates student data, falling back to `"UNKNOWN"` if Students Service is unavailable.  
-
----
-
-## Technologies Used
+## Korišćene Tehnologije
 
 - **Java 17**  
 - **Spring Boot 3.x**  
-- **Spring Data JPA** with Hibernate  
-- **H2 Database** (in-memory for development)  
-- **Spring Cloud OpenFeign** for inter-service calls  
-- **Resilience4j** for fault tolerance  
-- **Spring Cloud Eureka** for service discovery  
+- **Spring Data JPA** sa Hibernate  
+- **H2 Database** (in-memory za razvoj)  
+- **Spring Cloud OpenFeign** za međuservisne pozive  
+- **Resilience4j** za toleranciju na greške  
+- **Spring Cloud Eureka** za otkrivanje servisa  
 - **Jakarta Bean Validation** (`@NotNull`, `@Email`, `@Pattern`)  
-- **Maven** for dependency management  
+- **Maven** za upravljanje zavisnostima  
 
 ---
 
-## Modules
+## Moduli
 
 ### 1. Students Service
-- Exposes endpoints to **create, read, update, and delete students**.  
-- DTO (`StudentDTO`) ensures proper validation (full name, email, index number).  
-- Returns **meaningful HTTP responses** on validation errors or conflicts.  
+- Izlaže endpoint-e za **kreiranje, čitanje, ažuriranje i brisanje studenata**.  
+- DTO (`StudentDTO`) osigurava pravilnu validaciju (puno ime, email, broj indeksa).  
+- Vraća **smislene HTTP odgovore** u slučaju grešaka validacije ili konflikata.  
 
 ### 2. Enrollments Service
-- Exposes endpoints to **create, read, update, and delete enrollments**.  
-- Validates **student existence** via Feign client to Students Service.  
-- DTO (`EnrollmentDTO`) ensures course code and semester follow proper patterns.  
-- Aggregates student data for detailed views (`EnrollmentDetails`).  
-- Uses **Resilience4j** to handle downtime of Students Service gracefully.  
+- Izlaže endpoint-e za **kreiranje, čitanje, ažuriranje i brisanje upisa**.  
+- Validira **postojanje studenta** putem Feign klijenta ka Students Service.  
+- DTO (`EnrollmentDTO`) osigurava da kod kursa i semestar prate odgovarajući format.  
+- Agregira podatke o studentu za detaljan prikaz (`EnrollmentDetails`).  
+- Koristi **Resilience4j** za elegantno rukovanje nedostupnošću Students Service.  
 
 ---
 
-## Database Configuration
+## Konfiguracija Baze
 
-Both services use **in-memory H2 databases**:
+Oba servisa koriste **in-memory H2 baze**:
 
-| Service              | JDBC URL                                         | User | Password |
-|---------------------|-------------------------------------------------|------|----------|
-| Students Service     | `jdbc:h2:mem:studentsdb;DB_CLOSE_DELAY=-1`     | sa   | (empty)  |
-| Enrollments Service  | `jdbc:h2:mem:enrolldb;DB_CLOSE_DELAY=-1`       | sa   | (empty)  |
+| Servis               | JDBC URL                                         | Korisnik | Lozinka |
+|---------------------|-------------------------------------------------|----------|---------|
+| Students Service     | `jdbc:h2:mem:studentsdb;DB_CLOSE_DELAY=-1`     | sa       | (prazno)|
+| Enrollments Service  | `jdbc:h2:mem:enrolldb;DB_CLOSE_DELAY=-1`       | sa       | (prazno)|
 
-- The database is **in-memory**, so all data is lost when the service stops.  
-- Hibernate `ddl-auto: update` ensures tables are created automatically on startup.  
+- Baza je **in-memory**, tako da se svi podaci gube kada servis prestane da radi.  
+- Hibernate `ddl-auto: update` automatski kreira tabele pri pokretanju.  
 
 ---
 
-## H2 Console Access
+## Pristup H2 Konzoli
 
-Both services expose an H2 console for database inspection:
+Oba servisa izlažu H2 konzolu za pregled baze:
 
-| Service              | Console URL                     |
+| Servis               | URL konzole                     |
 |---------------------|---------------------------------|
 | Students Service     | `http://localhost:9081/h2`      |
 | Enrollments Service  | `http://localhost:9082/h2`      |
 
-- **JDBC URL:** same as `spring.datasource.url`  
-- **User:** `sa`  
-- **Password:** leave empty  
-- Ensure **the service is running** before opening the console.  
+- **JDBC URL:** isti kao `spring.datasource.url`  
+- **Korisnik:** `sa`  
+- **Lozinka:** ostaviti prazno  
+- Proverite da je **servis pokrenut** pre otvaranja konzole.  
 
 ---
 
-## Resilience & Fault Tolerance
+## Otpornost i Tolerancija na Greške
 
-- **Circuit Breaker:** prevents cascading failures when Students Service is down.  
-- **Retry:** automatically retries failed requests before triggering fallback.  
-- **Fallbacks:**  
-  - For `create`/`update` in Enrollments Service, if Students Service is down, a **503 Service Unavailable** is returned.  
-  - For `details` endpoint, a partial response is returned with student fields marked `"UNKNOWN"`.  
-
----
-
-## Running the Project
-
-1. Make sure **Eureka Server** is running on `http://localhost:8761`.  
-2. Start **Students Service**: runs on port `9081`.  
-3. Start **Enrollments Service**: runs on port `9082`.  
-4. Access H2 consoles if needed:
-
-5. Use **REST client** (Postman, curl, etc.) to test endpoints.  
+- **Circuit Breaker:** sprečava kaskadne greške kada Students Service nije dostupan.  
+- **Retry:** automatski pokušava ponovo neuspešne zahteve pre nego što se aktivira fallback.  
+- **Fallbacks / rezervne opcije:**  
+  - Za `create`/`update` u Enrollments Service, ako Students Service nije dostupan, vraća se **503 Service Unavailable**.  
+  - Za `details` endpoint, vraća se delimičan odgovor sa poljima studenta označenim kao `"UNKNOWN"`.  
 
 ---
 
-## Endpoints
+## Pokretanje Projekta
+
+1. Proverite da je **Eureka Server** pokrenut na `http://localhost:8761`.  
+2. Pokrenite **Students Service**: radi na portu `9081`.  
+3. Pokrenite **Enrollments Service**: radi na portu `9082`.  
+4. Pristupite H2 konzolama po potrebi.  
+5. Koristite **REST klijent** (Postman, curl, itd.) za testiranje endpoint-a.  
+
+---
+
+## Endpoints / API
 
 ### Students Service (`/students`)
-| Method | Endpoint               | Description                     |
-|--------|-----------------------|---------------------------------|
-| GET    | `/students`            | List all students               |
-| GET    | `/students/{id}`       | Get student by ID               |
-| POST   | `/students`            | Create a new student            |
-| PUT    | `/students/{id}`       | Update student                  |
-| DELETE | `/students/{id}`       | Delete student                  |
+| Metod | Endpoint               | Opis                               |
+|-------|-----------------------|-----------------------------------|
+| GET   | `/students`            | Lista svih studenata              |
+| GET   | `/students/{id}`       | Prikaži studenta po ID-u          |
+| POST  | `/students`            | Kreiraj novog studenta            |
+| PUT   | `/students/{id}`       | Ažuriraj studenta                 |
+| DELETE| `/students/{id}`       | Obriši studenta                   |
 
 ### Enrollments Service (`/enrollments`)
-| Method | Endpoint                         | Description                                 |
-|--------|---------------------------------|---------------------------------------------|
-| GET    | `/enrollments`                   | List all enrollments                        |
-| GET    | `/enrollments/{id}`              | Get enrollment by ID                         |
-| POST   | `/enrollments`                   | Create new enrollment                        |
-| PUT    | `/enrollments/{id}`              | Update enrollment                            |
-| DELETE | `/enrollments/{id}`              | Delete enrollment                            |
-| GET    | `/enrollments/{id}/details`      | Get enrollment + student details             |
+| Metod | Endpoint                         | Opis                                         |
+|-------|---------------------------------|---------------------------------------------|
+| GET   | `/enrollments`                   | Lista svih upisa                            |
+| GET   | `/enrollments/{id}`              | Prikaži upis po ID-u                         |
+| POST  | `/enrollments`                   | Kreiraj novi upis                            |
+| PUT   | `/enrollments/{id}`              | Ažuriraj upis                                |
+| DELETE| `/enrollments/{id}`              | Obriši upis                                  |
+| GET   | `/enrollments/{id}/details`      | Prikaži upis sa detaljima studenta          |
 
 ---
 
-## Validation & Error Handling
+## Validacija i Obrada Grešaka
 
-- **Students Service** validates:
-  - Full name: letters and spaces only  
-  - Email: valid email format  
-  - Index number: format `XXX/YYYY`  
+- **Students Service** validira:
+  - Puno ime: samo slova i razmaci  
+  - Email: validan email format  
+  - Broj indeksa: format `XXX/YYYY`  
 
-- **Enrollments Service** validates:
-  - Student ID: must exist and be positive  
-  - Course code: 2–4 uppercase letters + 2–4 digits (e.g., `DS101`)  
-  - Semester: format `1/2022`  
+- **Enrollments Service** validira:
+  - ID studenta: mora postojati i biti pozitivan  
+  - Kod kursa: 2–4 velika slova + 2–4 cifre (npr. `DS101`)  
+  - Semestar: format `1/2022`  
 
-- **Meaningful responses:**
-  - `404 Not Found` → for missing student or enrollment  
-  - `409 Conflict` → for duplicate email or index number  
-  - `400 Bad Request` → validation errors  
-  - `503 Service Unavailable` → when dependent service is down
-
----
+- **Smislene poruke:**
+  - `404 Not Found` → za nedostatak studenta ili upisa  
+  - `409 Conflict` → za duplirani email ili broj indeksa  
+  - `400 Bad Request` → greške validacije  
+  - `503 Service Unavailable` → kada zavisni servis nije dostupan
