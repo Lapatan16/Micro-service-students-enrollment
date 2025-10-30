@@ -63,7 +63,7 @@ Sistem se sastoji od dva glavna servisa:
 
 | Servis               | Port  | Rute / Endpoint-i                       | Odgovornosti                                  |
 |---------------------|-------|----------------------------------------|-----------------------------------------------|
-| API Gateway          | 8081  | `/students/**`, `/enrollments/**`      | Rukovanje svim spoljnim zahtevima, prosleđivanje ka odgovarajućim mikroservisima |
+| API Gateway          | 8081  | `/api/**`, `/api/**`      | Rukovanje svim spoljnim zahtevima, prosleđivanje ka odgovarajućim mikroservisima |
 | Students Service     | 9081  | `/students`, `/students/{id}`          | Upravljanje studentima (CRUD), validacija   |
 | Enrollments Service  | 9082  | `/enrollments`, `/enrollments/{id}`, `/enrollments/{id}/details` | Upravljanje upisima (CRUD), agregacija podataka o studentima, validacija, otpornost na greške (Resilience4j) |
 | Eureka Server        | 8761  | `/`                                     | Otkrivanje servisa (Service Registry)        |
@@ -79,8 +79,7 @@ Oba servisa izlažu H2 konzolu za pregled baze:
 |---------------------|---------------------------------|
 | Students Service     | `http://localhost:9081/h2`      |
 | Enrollments Service  | `http://localhost:9082/h2`      |
-
-- **JDBC URL:** isti kao `spring.datasource.url`  
+ 
 - **Korisnik:** `sa`  
 - **Lozinka:** ostaviti prazno  
 - Proverite da je **servis pokrenut** pre otvaranja konzole.  
