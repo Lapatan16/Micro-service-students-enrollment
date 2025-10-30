@@ -6,6 +6,7 @@
 - [Arhitektura](#arhitektura)  
 - [Korišćene Tehnologije](#korišćene-tehnologije)
 - [Šta je urađeno](#šta-je-urađeno)
+- [UML](#uml)
 - [Moduli](#moduli)  
 - [Tabela servisa](#tabela-servisa)  
 - [Pristup H2 Konzoli](#pristup-h2-konzoli)  
@@ -64,6 +65,10 @@ Sistem se sastoji od dva glavna servisa:
 ### Opciono
 
 1. Jednostavna autentikacija na gateway-u putem API key filter
+
+## UML
+
+<img width="1024" height="1024" alt="UML_PDS" src="https://github.com/user-attachments/assets/06fbb63d-607a-417a-bc08-b6d7254c1ff5" />
 
 ## Moduli
 
