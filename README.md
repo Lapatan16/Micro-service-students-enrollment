@@ -1,10 +1,11 @@
-# Projekat Mikroservisa: Studenti i Upisi
+# Mikroservisna arhitektura prijavljivanja ispita
 
 ## Sadržaj
 
 - [Pregled Projekta](#pregled-projekta)  
 - [Arhitektura](#arhitektura)  
-- [Korišćene Tehnologije](#korišćene-tehnologije)  
+- [Korišćene Tehnologije](#korišćene-tehnologije)
+- [Šta je urađeno](#šta-je-urađeno)
 - [Moduli](#moduli)  
 - [Tabela servisa](#tabela-servisa)  
 - [Pristup H2 Konzoli](#pristup-h2-konzoli)  
