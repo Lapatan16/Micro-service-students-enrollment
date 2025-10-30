@@ -23,7 +23,8 @@ Ovaj projekat je **sistem baziran na mikroservisima** za upravljanje studentima 
 - **RESTful API-ji** za CRUD operacije  
 - **Validacija** koristeći Jakarta Bean Validation (`@Valid`, `@NotNull`, `@Pattern`)  
 - **Otpornost i tolerancija na greške** koristeći Resilience4j (Circuit Breaker + Retry)  
-- In-memory **H2 bazu** za brzi razvoj i testiranje  
+- In-memory **H2 bazu** za brzi razvoj i testiranje
+- Testovi nad **kontrolerima**, **servisima** i **repozitorijumima**.
 
 Sistem se sastoji od dva glavna servisa:
 
@@ -47,14 +48,12 @@ Sistem se sastoji od dva glavna servisa:
 ## Moduli
 
 ### 1. Students Service
-- Izlaže endpoint-e za **kreiranje, čitanje, ažuriranje i brisanje studenata**.  
-- DTO (`StudentDTO`) osigurava pravilnu validaciju (puno ime, email, broj indeksa).  
-- Vraća **smislene HTTP odgovore** u slučaju grešaka validacije ili konflikata.  
+- Izlaže endpoint-e za **kreiranje, čitanje, ažuriranje i brisanje studenata**.   
+- Vraća **odgovarajuće HTTP odgovore** u slučaju grešaka validacije ili konflikata.  
 
 ### 2. Enrollments Service
 - Izlaže endpoint-e za **kreiranje, čitanje, ažuriranje i brisanje upisa**.  
 - Validira **postojanje studenta** putem Feign klijenta ka Students Service.  
-- DTO (`EnrollmentDTO`) osigurava da kod kursa i semestar prate odgovarajući format.  
 - Agregira podatke o studentu za detaljan prikaz (`EnrollmentDetails`).  
 - Koristi **Resilience4j** za elegantno rukovanje nedostupnošću Students Service.  
 
@@ -102,11 +101,15 @@ Oba servisa izlažu H2 konzolu za pregled baze:
 
 ## Pokretanje Projekta
 
-1. Proverite da je **Eureka Server** pokrenut na `http://localhost:8761`.  
-2. Pokrenite **Students Service**: radi na portu `9081`.  
-3. Pokrenite **Enrollments Service**: radi na portu `9082`.  
-4. Pristupite H2 konzolama po potrebi.  
-5. Koristite **REST klijent** (Postman, curl, itd.) za testiranje endpoint-a.  
+### Redosled pokretanja
+
+1. DiscoveryServiceApplication
+2. ApiGateWayApplication
+3. StudentsServiceApplication
+4. EnrollmentsServiceApplication
+  
+Pristupite H2 konzolama po potrebi.  
+Koristite **REST klijent** (Postman, curl, itd.) za testiranje endpoint-a.  
 
 ---
 
@@ -145,8 +148,8 @@ Oba servisa izlažu H2 konzolu za pregled baze:
   - Kod kursa: 2–4 velika slova + 2–4 cifre (npr. `DS101`)  
   - Semestar: format `1/2022`  
 
-- **Smislene poruke:**
-  - `404 Not Found` → za nedostatak studenta ili upisa  
+- **Poruke grešaka:**
+  - `404 Not Found` → za nedostatak podataka  
   - `409 Conflict` → za duplirani email ili broj indeksa  
   - `400 Bad Request` → greške validacije  
   - `503 Service Unavailable` → kada zavisni servis nije dostupan
