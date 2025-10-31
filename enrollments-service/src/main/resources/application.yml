@@ -24,7 +24,7 @@ logging:
     root: INFO
     com.example.enrollments.feign: DEBUG
     org.springframework.cloud.openfeign: INFO
-    io.github.resilience4j: DEBUG
+    io.github.resilience4j: INFO
 
 feign:
   client:

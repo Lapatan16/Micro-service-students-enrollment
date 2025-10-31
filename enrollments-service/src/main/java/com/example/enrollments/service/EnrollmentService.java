@@ -11,7 +11,9 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,38 +33,55 @@ public class EnrollmentService {
 
     /** Return all enrollments */
     public List<Enrollment> all() {
-        return repo.findAll();
+            return repo.findAll();
     }
 
-    /** Return a single enrollment or throw 404 */
     public Enrollment byId(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Enrollment with ID " + id + " not found"));
     }
 
-    /** Create a new enrollment (validates student existence) */
+    @CircuitBreaker(name = "studentsCB", fallbackMethod = "createFallback")
+    @Retry(name = "studentsRetry")
     public Enrollment create(EnrollmentDTO dto) {
         log.info("Creating enrollment for studentId={}, courseCode={}, semester={}",
                 dto.studentId(), dto.courseCode(), dto.semester());
 
-        StudentDTO student;
         try {
-            // Only service failures reach the circuit breaker
-            student = fetchStudentWithResilience(dto.studentId());
-        } catch (NoSuchElementException nse) {
-            log.warn("Student with ID {} does not exist", dto.studentId());
-            // Student missing → 404, CB never sees it
-            throw nse;
+            StudentDTO s = studentClient.getStudent(dto.studentId());
+
+            if (s == null) {
+                log.warn("Students service returned null for studentId={}", dto.studentId());
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Students service invalid response");
+            }
+
+            Enrollment enrollment = Enrollment.builder()
+                    .studentId(dto.studentId())
+                    .courseCode(dto.courseCode())
+                    .semester(dto.semester())
+                    .build();
+
+            return repo.save(enrollment);
+
+        } catch (FeignException.NotFound nf) {
+            log.warn("Student with ID {} not found (404)", dto.studentId());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student with ID " + dto.studentId() + " not found");
+
+        } catch (FeignException ex) {
+            log.error("Feign exception fetching student {}: {}", dto.studentId(), ex.getMessage());
+            throw ex;
         }
-
-        Enrollment enrollment = Enrollment.builder()
-                .studentId(dto.studentId())
-                .courseCode(dto.courseCode())
-                .semester(dto.semester())
-                .build();
-
-        return repo.save(enrollment);
     }
+
+    private Enrollment createFallback(EnrollmentDTO dto, Throwable ex) {
+        log.error("Create enrollment fallback triggered for studentId={} due to: {}",
+                dto.studentId(), ex.toString());
+        throw new ResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Students service unavailable (Circuit Breaker) – cannot create enrollment now"
+        );
+    }
+
 
     /** Update an existing enrollment */
     public Enrollment update(Long id, EnrollmentDTO dto) {
